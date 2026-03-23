@@ -1,6 +1,6 @@
 from core.embedder import embed_text
-
 from core.similarity import find_similar
+from core.analyzer import detect_pattern
 
 
 bug_database = [
@@ -22,8 +22,15 @@ if __name__=="__main__":
 
     embeddings=embed_text(text)
     similar=find_similar(embeddings,bug_database)
+    pattern =detect_pattern(similar,category="type_error")
 
     print("\nSimilar Bugs:") 
     for item in similar: 
         print(f"{item['text']} → {item['similarity']:.2f}")
+    
+    print("\n Pattern Analysis:")
+
+    print(pattern["message"])
+
+    
 
