@@ -12,5 +12,5 @@ if token:
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
 def embed_text(text):
-    embeddings = model.encode(text)
+    embeddings = model.encode(text,normalize_embeddings=True)
     return embeddings

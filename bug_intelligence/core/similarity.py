@@ -1,17 +1,19 @@
 import numpy as np
 
 def cosine_similarity(vec1,vec2):
-    vec1=np.array(vec1)
-    vec2=np.array(vec2)
+    return np.dot(vec1,vec2)
 
-    dot_product=np.dot(vec1,vec2)
+CATEGORY_THRESHOLDS = {
+    "type_error": 0.7,
+    "async_misuse": 0.65,
+    "syntax_error": 0.6,
+    "logic_error": 0.75
+}
 
-    norm1=np.linalg.norm(vec1)
-    norm2=np.linalg.norm(vec2)
 
-    return dot_product /(norm1*norm2)
+def find_similar(new_embeddings,database,category):
 
-def find_similar(new_embeddings,database,category,threshold=0.6):
+    threshold=CATEGORY_THRESHOLDS.get(category, 0.65)
     results=[]
 
     for bug in database:
@@ -26,6 +28,7 @@ def find_similar(new_embeddings,database,category,threshold=0.6):
                 "similarity":round(sim,2)
 
             })
+            
 
     #sorting by similarity
     results.sort(key=lambda x: x["similarity"],reverse=True)
