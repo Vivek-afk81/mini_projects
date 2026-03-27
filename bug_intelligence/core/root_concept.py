@@ -2,6 +2,7 @@ import os
 from typing import Optional
 import numpy as np
 import re
+import json
 
 from huggingface_hub import InferenceClient
 
