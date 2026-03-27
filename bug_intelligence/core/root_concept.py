@@ -37,9 +37,7 @@ for language,categories in CONCEPT_MAP.items():
 
 
 """LAYER 1: RULE BASED LOOKUP"""
-def _rule_based_concept(
-        category: str,error_text:str,language:str) -> Optional[dict]:
-    
+def _rule_based_concept(category: str, error_text: str, language: str) -> Optional[dict]:
     lang_map = CONCEPT_MAP.get(language, CONCEPT_MAP["python"])
     concepts = lang_map.get(category)
 
@@ -54,7 +52,7 @@ def _rule_based_concept(
         if any(kw in error_normalized for kw in concept["keywords"]):
             return concept
 
-    return concepts[0]
+    return None  # ← no keyword matched, let embeddings try
 
 
 """LAYER 2 : EMBEDDING MATCH"""
