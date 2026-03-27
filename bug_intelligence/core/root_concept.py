@@ -109,7 +109,9 @@ def _llm_concept(
     language: str
 ) -> dict:
 
-    prompt = f"""A {language} developer hit this error:
+    prompt = f"""You are a coding mentor. Respond with valid JSON only.
+
+A {language} developer hit this error:
 "{error_text}"
 
 It is classified as: {category}
