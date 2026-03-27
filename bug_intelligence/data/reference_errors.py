@@ -36,5 +36,13 @@ REFERENCE_ERRORS = {
         normalize("wrong output unexpected result"),
         normalize("incorrect behavior"),
         normalize("unexpected value returned")
-    ]
+    ],
+
+    "memory_error": [
+    normalize("malloc returned null memory allocation failed"),
+    normalize("double free or corruption"),
+    normalize("use after free invalid memory access"),
+    normalize("heap buffer overflow"),
+    normalize("segmentation fault core dumped"),
+]
 }

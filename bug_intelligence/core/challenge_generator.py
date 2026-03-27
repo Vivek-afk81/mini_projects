@@ -1,5 +1,4 @@
-# core/challenge_generator.py
-
+import os
 import json
 import re
 from huggingface_hub import InferenceClient
@@ -9,7 +8,7 @@ from utils.fallback_challenges import FALLBACK_CHALLENGES
 
 client = InferenceClient(
     model="mistralai/Mistral-7B-Instruct-v0.3",
-    token="your_hf_token"
+    token = os.getenv("HUGGINGFACE_TOKEN")
 )
 
 

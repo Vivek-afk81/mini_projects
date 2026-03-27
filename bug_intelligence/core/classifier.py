@@ -4,6 +4,7 @@ from core.embedder import embed_text
 from core.similarity import cosine_similarity
 from data.reference_errors import REFERENCE_ERRORS
 from utils.text import normalize
+from utils.keywords import KEYWORD_MAP,SPECIAL_RULES
 
 """config"""
 SIMILARITY_THRESHOLD = 0.5
@@ -21,21 +22,13 @@ for category, examples in REFERENCE_ERRORS.items():
     REFERENCE_EMBEDDINGS[category] = normalized
 
 """LAYER 1 Keyword rules"""
-KEYWORD_MAP = {
-    "async_misuse":    ["await", "coroutine", "asyncio", "event loop"],
-    "type_error":      ["typeerror", "unsupported operand"],
-    "off_by_one":      ["indexerror", "index out of range", "list index"],
-    "null_deref":      ["nonetype"],
-    "scope_confusion": ["nameerror", "not defined"],
-    "syntax_error":    ["syntaxerror", "invalid syntax"],
-}
 
 def _keyword_classify(text: str) -> Optional[str]:
     text = normalize(text)
 
-    # special rule — must run before general loop
-    if "int" in text and "str" in text:
-        return "type_error"
+    for condition, category in SPECIAL_RULES:
+        if condition(text):
+            return category
 
     for category, keywords in KEYWORD_MAP.items():
         if any(keyword in text for keyword in keywords):

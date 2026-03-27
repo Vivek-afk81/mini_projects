@@ -40,5 +40,11 @@ FALLBACK_CHALLENGES = {
         "code_snippet": "def is_adult(age):\n    if age > 18:\n        return True\n    return False\n\nprint(is_adult(18))",
         "hint": "Test the boundary case — what about exactly 18?",
         "correct_concept": "The condition should be >= 18, not > 18. Off-by-one in conditions is a common logic error."
-    }
+    },
+    "memory_error": {
+    "instruction": "This C code compiles but causes a crash at runtime — what's wrong?",
+    "code_snippet": "int *ptr = malloc(sizeof(int));\n*ptr = 42;\nfree(ptr);\nfree(ptr);",
+    "hint": "How many times is free() being called on the same pointer?",
+    "correct_concept": "Calling free() twice on the same pointer corrupts the allocator. Free each allocation exactly once."
+},
 }
