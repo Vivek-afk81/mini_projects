@@ -24,10 +24,23 @@ LEVEL_DESCRIPTIONS = {
 
 def _safe_parse(text: str) -> dict:
     """Extract JSON even if model adds extra text around it."""
+    
+    # find the JSON block
     match = re.search(r'\{.*\}', text, re.DOTALL)
-    if match:
-        return json.loads(match.group())
-    raise ValueError("No JSON found in response")
+    if not match:
+        raise ValueError("No JSON found in response")
+    
+    raw = match.group()
+    
+    # fix invalid escape sequences before parsing
+    # replaces any \x that isn't a valid JSON escape
+    raw = re.sub(
+        r'\\(?!["\\/bfnrtu])',  # match \ not followed by valid escape chars
+        r'\\\\',                # replace with double backslash
+        raw
+    )
+    
+    return json.loads(raw)
 
 
 # PROMPT BUILDER
