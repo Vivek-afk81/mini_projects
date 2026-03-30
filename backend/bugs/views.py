@@ -9,11 +9,13 @@ from .services.services import process_bug
 def analyze_view(request):
     serializer=BugSerializer(data=request.data)
 
+
     if serializer.is_valid():
+        user=request.user
         text=serializer.validated_data['text']
         language=serializer.validated_data['language']
 
-        result=process_bug(text,language)
+        result=process_bug(user,text,language)
         return Response(result)
     return Response(serializer.errors, status=400)
 

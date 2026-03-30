@@ -34,7 +34,7 @@ def find_similar_from_db(new_embedding, category):
         if not bug.embedding:
             continue
         stored_emb = np.array(bug.embedding)
-        sim = cosine_similarity(new_embedding, bug.embedding)
+        sim = cosine_similarity(new_embedding, stored_emb)
 
         if sim > threshold:
             similar.append({
@@ -46,8 +46,8 @@ def find_similar_from_db(new_embedding, category):
     return similar
 
 
-def process_bug(text, language="python"):
-
+def process_bug(user,text, language="python"):
+    
     # 1. classify
     classification = classify_bug(text)
     category = classification["category"]
@@ -66,6 +66,7 @@ def process_bug(text, language="python"):
 
     # 6. save
     bug = BugLog.objects.create(
+        user=user,
         error_message=text,
         language=language,
         category=category,
