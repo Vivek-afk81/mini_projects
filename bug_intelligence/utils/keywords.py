@@ -28,11 +28,13 @@ KEYWORD_MAP = {
 
     "type_error": [
         "typeerror",
+        "module object is not callable",
         "unsupported operand",
         "unsupported operand type",
         "must be str not int",
         "must be int not str",
         "cant multiply sequence",
+        "str object does not support item assignment",
         "cannot concatenate",
         "can only concatenate",          # "can only concatenate str"
         "invalid literal",               # int("abc") → invalid literal for int()
@@ -40,6 +42,10 @@ KEYWORD_MAP = {
         "operand types",
         "no operator",                   # "no operator+ for string and int"
         "implicit conversion",
+    ],
+
+    "attribute_error":[
+        "str object has no attribute reverse" 
     ],
 
     "off_by_one": [

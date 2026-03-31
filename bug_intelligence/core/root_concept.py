@@ -22,17 +22,25 @@ CONCEPT_SIMILARITY_THRESHOLD = 0.4
 #precomputing concept threshold
 CONCEPT_EMBEDDINGS={}
 
-for language,categories in CONCEPT_MAP.items():
-    CONCEPT_EMBEDDINGS[language]={}
+# in root_concept.py — replace your precomputation block
+
+for language, categories in CONCEPT_MAP.items():
+    CONCEPT_EMBEDDINGS[language] = {}
 
     for category, concepts in categories.items():
-        embedded=[]
-        for concept in concepts:
-            emb = embed_text(normalize(concept["explanation"]))
+        # collect all explanations at once
+        texts = [normalize(c["explanation"]) for c in concepts]
+        
+        # one model call instead of N calls
+        embeddings = embed_text(texts)  # returns array of shape (N, dim)
+        
+        embedded = []
+        for concept, emb in zip(concepts, embeddings):
             norm = np.linalg.norm(emb)
             if norm != 0:
                 emb = emb / norm
             embedded.append((concept, emb))
+        
         CONCEPT_EMBEDDINGS[language][category] = embedded
 
 

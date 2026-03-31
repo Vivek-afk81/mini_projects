@@ -18,7 +18,11 @@ def get_model():
     return model
 
 
-def embed_text(text):
+# def embed_text(text):
+#     model_instance = get_model()
+#     embeddings = model_instance.encode(text, normalize_embeddings=True)
+#     return embeddings
+# in embedder.py
+def embed_text(text: str | list):
     model_instance = get_model()
-    embeddings = model_instance.encode(text, normalize_embeddings=True)
-    return embeddings
+    return model_instance.encode(text, normalize_embeddings=True)
