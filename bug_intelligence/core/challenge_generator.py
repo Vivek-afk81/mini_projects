@@ -75,7 +75,7 @@ Return ONLY this JSON with no extra text:
     "instruction": "warm question asking them to spot the problem",
     "code_snippet": "short buggy code in a different scenario",
     "hint": "gentle nudge toward the right concept",
-    "correct_concept": "one sentence — what they should understand after this"
+    "correct_concept":"one sentence explaining the specific bug in the code snippet — for example: 'The opening parenthesis on greet() is never closed — Python needs every ( to have a matching )'"
 }}"""
 
 
