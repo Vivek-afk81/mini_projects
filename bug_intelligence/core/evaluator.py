@@ -8,9 +8,7 @@ client = InferenceClient(
     token=os.getenv("HUGGINGFACE_TOKEN")
 )
 
-# ==============================
 # SAFE JSON PARSER
-# ==============================
 def _safe_parse(text: str) -> dict:
     """Extract JSON even if model adds extra text around it."""
     match = re.search(r'\{.*\}', text, re.DOTALL)
@@ -25,9 +23,8 @@ def _safe_parse(text: str) -> dict:
     )
     return json.loads(raw)
 
-# ==============================
 # MAIN FUNCTION
-# ==============================
+
 def evaluate_answer(
     user_answer: str,
     correct_concept: str,
