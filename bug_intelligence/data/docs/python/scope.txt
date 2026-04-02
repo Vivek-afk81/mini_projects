@@ -1,0 +1,23 @@
+PYTHON VARIABLE SCOPE
+
+Scope defines where a variable can be accessed in your program.
+
+Local scope: A variable defined inside a function exists only inside that function.
+It is created when the function is called and destroyed when the function returns.
+
+Global scope: A variable defined outside all functions is global.
+It can be read from inside functions but cannot be reassigned without the global keyword.
+
+NameError is raised when you try to use a variable that has not been defined
+in the current scope.
+Common cause: using a variable before assigning it, or using a loop variable outside the loop.
+
+The global keyword allows a function to reassign a global variable:
+global x
+x = 10
+
+LEGB Rule — Python looks up names in this order:
+L — Local (inside the current function)
+E — Enclosing (outer function, if nested)
+G — Global (module level)
+B — Built-in (Python built-ins like len, print)
