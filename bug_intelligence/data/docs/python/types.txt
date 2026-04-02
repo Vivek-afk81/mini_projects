@@ -1,0 +1,30 @@
+PYTHON TYPES AND TYPE CONVERSION
+
+Every value in Python has a type. The main built-in types are:
+int, float, str, bool, list, tuple, dict, set, NoneType.
+
+Python is dynamically typed. Variables do not have fixed types.
+The type of a variable is determined by the value assigned to it.
+
+Python is strongly typed. It does not automatically convert between types.
+You cannot add a string and an integer directly.
+Example: "age" + 25 raises TypeError.
+
+The input() function always returns a string, regardless of what the user types.
+If the user types 25, input() returns the string "25", not the integer 25.
+To use it as a number, you must convert it: int(input())
+
+Type conversion functions:
+int(x)   — converts x to integer
+float(x) — converts x to float
+str(x)   — converts x to string
+bool(x)  — converts x to boolean
+
+TypeError is raised when an operation is applied to an object of inappropriate type.
+Common causes:
+- Adding str and int: "hello" + 5
+- Comparing str and int: "25" > 18
+- Passing wrong type to a function
+
+String formatting with f-strings avoids type errors in print statements.
+Use f"Hello {name}" instead of "Hello" + name when name is not a string.
