@@ -1,3 +1,4 @@
+# data/concept_map.py
 
 CONCEPT_MAP = {
     "python": {
@@ -38,7 +39,7 @@ CONCEPT_MAP = {
             {
                 "name": "Python Syntax Rules",
                 "explanation": "Python is strict about colons, indentation, and brackets. Every if, for, while, and def needs a colon. Every open bracket needs closing.",
-                "keywords": ["syntax", "indent", "colon", "bracket", "def", "if", "for"]
+                "keywords": ["syntax", "indent", "colon", "bracket", "def", "if", "for", "eof", "parenthesis"]
             }
         ],
         "async_misuse": [
@@ -82,7 +83,7 @@ CONCEPT_MAP = {
             {
                 "name": "C Syntax Rules",
                 "explanation": "C requires semicolons at the end of every statement. Every opening brace needs a closing brace. Variables must be declared before use.",
-                "keywords": ["semicolon", "brace", "declared", "syntax", "expected"]
+                "keywords": ["semicolon", "brace", "declared", "syntax", "expected", "before", "return"]
             }
         ]
     },
@@ -113,6 +114,20 @@ CONCEPT_MAP = {
                 "name": "Variable Scope and Lifetime",
                 "explanation": "Variables in C++ live only within their enclosing block. A variable declared inside an if or loop does not exist outside it. References to out-of-scope variables cause undefined behavior.",
                 "keywords": ["declared", "scope", "lifetime", "block", "undefined"]
+            }
+        ],
+        "syntax_error": [
+            {
+                "name": "C++ Syntax Rules",
+                "explanation": "C++ requires semicolons at the end of every statement. Every opening bracket, brace, and parenthesis needs a matching closing one. For loops need exactly two semicolons inside the header.",
+                "keywords": ["semicolon", "brace", "bracket", "expected", "before", "return", "syntax", "parenthesis", "for"]
+            }
+        ],
+        "off_by_one": [
+            {
+                "name": "Array Bounds and Loop Ranges",
+                "explanation": "Arrays in C++ start at index 0. Accessing index N on an array of size N is out of bounds. Loop conditions using < N are correct — using <= N goes one step too far.",
+                "keywords": ["index", "array", "bounds", "range", "overflow"]
             }
         ]
     }

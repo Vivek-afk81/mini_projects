@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from .models import UserProfile
 class RegisterSerializer(serializers.ModelSerializer):
     password=serializers.CharField(write_only=True)  # write only true input comes password but not included in output response
 
@@ -22,6 +23,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
         )
         return user
+
+
+class OnboardingSerializer(serializers.Serializer):
+    language   = serializers.ChoiceField(choices=['python', 'c', 'cpp'])
+    experience = serializers.ChoiceField(choices=['beginner', 'intermediate'])
 
 #view calls this
 

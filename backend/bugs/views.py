@@ -14,8 +14,9 @@ def analyze_view(request):
         user=request.user
         text=serializer.validated_data['text']
         language=serializer.validated_data['language']
-
+        
         result=process_bug(user,text,language)
+        request.user.profile.update_streak() 
         return Response(result)
     return Response(serializer.errors, status=400)
 

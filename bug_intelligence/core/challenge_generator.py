@@ -1,3 +1,5 @@
+# core/challenge_generator.py
+
 import os
 import json
 import re
@@ -7,44 +9,32 @@ from utils.text import normalize
 from utils.fallback_challenges import FALLBACK_CHALLENGES
 
 client = InferenceClient(
-    model="Qwen/Qwen2.5-7B-Instruct",  
+    model="Qwen/Qwen2.5-7B-Instruct",
     token=os.getenv("HUGGINGFACE_TOKEN")
 )
 
-
+# ==============================
 # CONFIG
-
+# ==============================
 LEVEL_DESCRIPTIONS = {
     "beginner":     "has less than 6 months of experience",
     "intermediate": "has 6 months to 2 years of experience"
 }
 
-
+# ==============================
 # SAFE JSON PARSER
-
+# ==============================
 def _safe_parse(text: str) -> dict:
-    """Extract JSON even if model adds extra text around it."""
-    
-    # find the JSON block
     match = re.search(r'\{.*\}', text, re.DOTALL)
     if not match:
         raise ValueError("No JSON found in response")
-    
     raw = match.group()
-    
-    # fix invalid escape sequences before parsing
-    # replaces any \x that isn't a valid JSON escape
-    raw = re.sub(
-        r'\\(?!["\\/bfnrtu])',  # match \ not followed by valid escape chars
-        r'\\\\',                # replace with double backslash
-        raw
-    )
-    
+    raw = re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', raw)
     return json.loads(raw)
 
-
+# ==============================
 # PROMPT BUILDER
-
+# ==============================
 def _build_prompt(
     error_text: str,
     category: str,
@@ -54,45 +44,43 @@ def _build_prompt(
 ) -> str:
     level_desc = LEVEL_DESCRIPTIONS.get(user_level, "is a beginner")
 
-    return f"""You are a warm, encouraging coding mentor inside an app called Fixora.
+    return f"""You are a warm coding mentor inside an app called Fixora.
 
 A {language} developer who {level_desc} hit this error yesterday:
 "{error_text}"
 
-The root concept they are missing is: {root_concept}
+Root concept they are missing: {root_concept}
 
-Generate a daily challenge that follows these rules:
-1. Use a DIFFERENT scenario than their original error
-   (they must think, not just remember their fix)
-2. Test whether they now understand: {root_concept}
-3. Write warmly — like a mentor, not an examiner
-4. Give a hint that points toward the concept without giving the answer
-5. Keep the code snippet short — maximum 6 lines
-6. Write the code snippet in {language}
+Your job:
+1. Write a short buggy {language} code snippet (max 6 lines)
+2. The bug in YOUR code must directly demonstrate: {root_concept}
+3. Use a completely different scenario from their original error
+4. Write the correct_concept to describe the EXACT bug in YOUR code snippet
+5. The hint should point toward the bug without giving it away
+
+Example of a good instruction:
+"Hey! Something looks off in this snippet — can you spot what the compiler would complain about and why?"
 
 Return ONLY this JSON with no extra text:
 {{
-    "instruction": "warm question asking them to spot the problem",
-    "code_snippet": "short buggy code in a different scenario",
-    "hint": "gentle nudge toward the right concept",
-    "correct_concept": "one sentence — what they should understand after this"
+    "instruction": "a specific warm question about YOUR code snippet",
+    "code_snippet": "your buggy {language} code here — different scenario, max 6 lines",
+    "hint": "gentle nudge toward the bug in your code without giving the answer",
+    "correct_concept": "one sentence describing the exact bug in your code snippet specifically"
 }}"""
 
-
-# HARD FALLBACK CHALLENGES
-
-# if LLM fails completely — these fire instead
-# one per category, better than crashing
+# ==============================
+# FALLBACK HELPER
+# ==============================
 def _get_fallback(category: str) -> dict:
-    """Return safe fallback challenge if LLM fails."""
     return FALLBACK_CHALLENGES.get(
         category,
         FALLBACK_CHALLENGES["logic_error"]
     )
 
-
+# ==============================
 # MAIN FUNCTION
-
+# ==============================
 def generate_challenge(
     error_text: str,
     category: str,
@@ -126,8 +114,7 @@ def generate_challenge(
                 }
             ],
             max_tokens=400,
-            temperature=0.7   # slightly higher than root_concept
-                              # more creative challenges
+            temperature=0.7
         )
 
         result = _safe_parse(response.choices[0].message.content)
@@ -137,16 +124,12 @@ def generate_challenge(
         if not all(field in result for field in required):
             raise ValueError("Missing fields in LLM response")
 
+        # guard — instruction still a placeholder
+        if "warm question" in result["instruction"].lower():
+            raise ValueError("LLM returned placeholder instruction")
+
         return result
-    
+
     except Exception as e:
-        print(f"DEBUG — LLM failed: {e}")
+        print(f"DEBUG — Challenge generation failed: {e}")
         return _get_fallback(category)
-
-    # except Exception:
-    #     # LLM failed — return hardcoded fallback for this category
-    #     return FALLBACK_CHALLENGES.get(
-    #         category,
-    #         FALLBACK_CHALLENGES["logic_error"]  # default if category unknown
-    #     )
-

@@ -1,0 +1,121 @@
+default_app_config = 'accounts.AccountsConfig'
+```
+
+This tells Django to use your `AccountsConfig` class when loading the accounts app. In newer Django versions this is automatic, but it's safe to be explicit.
+
+---
+
+## What the flow looks like now
+```
+POST /api/accounts/register/
+        ↓
+register_view runs
+        ↓
+User.objects.create_user(username, email, password)
+        ↓
+Django saves the User to DB
+        ↓
+post_save signal fires automatically
+        ↓
+create_user_profile() runs
+        ↓
+created=True → UserProfile.objects.create(user=instance)
+        ↓
+UserProfile saved to DB linked to that User
+        ↓
+save_user_profile() runs
+        ↓
+instance.userprofile.save()
+        ↓
+Both User and UserProfile exist, fully linked
+```
+
+Your register view doesn't need to know about `UserProfile` at all. It just creates the user. Signals handle the rest automatically.
+
+---
+
+## File structure for accounts app
+```
+accounts/
+    __init__.py      ← default_app_config
+    apps.py          ← ready() imports signals
+    models.py        ← User, UserProfile
+    signals.py       ← your signal functions
+    serializers.py   ← RegisterSerializer
+    views.py         ← register, login, profile views
+    urls.py          ← url patterns
+
+
+
+--------------------------------------------------------------------------------------------------------
+how page will look like->
+
+    🔹 STEP 1: User registers
+POST /register/
+
+👉 Backend:
+
+creates User
+signal creates UserProfile
+UserProfile:
+language = "python" (default)
+experience = "beginner" (default)
+🔹 STEP 2: User logs in
+POST /login/
+
+👉 Backend returns JWT token
+
+{
+  "access": "abc123..."
+}
+🔹 STEP 3: Frontend shows onboarding screen
+
+UI example:
+
+Select Language:
+[ Python | C | C++ ]
+
+Select Experience:
+[ Beginner | Intermediate | Advanced ]
+
+[ Submit ]
+🔹 STEP 4: User submits form
+
+Frontend sends:
+
+POST /api/accounts/onboarding/
+Authorization: Bearer <JWT>
+{
+  "language": "cpp",
+  "experience": "intermediate"
+}
+🔥 STEP 5: Backend receives request
+
+Now your view runs:
+
+profile = request.user.profile
+
+👉 Why this works:
+
+JWT → identifies user
+Django sets request.user
+related_name='profile' → gives profile
+🔹 STEP 6: Serializer updates profile
+serializer = OnboardingSerializer(profile, data=request.data, partial=True)
+
+👉 Meaning:
+
+Take existing profile
+update only given fields
+🔹 STEP 7: Save
+serializer.save()
+
+👉 DB now becomes:
+
+UserProfile:
+language = "cpp"
+experience = "intermediate"
+🔹 STEP 8: Response sent
+{
+  "message": "Profile updated successfully"
+}

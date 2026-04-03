@@ -7,5 +7,6 @@ urlpatterns = [
     path('register/',views.register_view, name='register'),
       path('login/', TokenObtainPairView.as_view()),
     path('refresh/', TokenRefreshView.as_view()),
+     path('onboarding/', views.onboarding_view, name='onboarding'), 
 #direclty handles login and refresh things login returns acces and refresh tokens which when verified gives user object in user in accounts/views function
 ]

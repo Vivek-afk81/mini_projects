@@ -18,5 +18,17 @@ def register_view(request):
 
 
 
+from .serializers import OnboardingSerializer
 
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])  # must be logged in
+def onboarding_view(request):
+    serializer = OnboardingSerializer(data=request.data)
+    if serializer.is_valid():
+        profile = request.user.profile   # access UserProfile via OneToOne
+        profile.language   = serializer.validated_data['language']
+        profile.experience = serializer.validated_data['experience']
+        profile.save()
+        return Response({'message': 'Onboarding complete'}, status=200)
+    return Response(serializer.errors, status=400)
 
