@@ -50,10 +50,3 @@ def load_and_chunk_docs(docs_dir:str) -> list[dict]:
     
     return all_chunks
 
-
-if __name__ == "__main__":
-    sample = "This is a test. " * 50
-    chunks = chunk_text(sample)
-    print(f"Total chunks: {len(chunks)}")
-    print(f"First chunk: {chunks[0]}")
-    print(f"Second chunk: {chunks[1]}")
