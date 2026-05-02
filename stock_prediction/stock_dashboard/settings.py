@@ -126,10 +126,8 @@ PROPHET_PARAMS = {
 PROPHET_FORECAST_DAYS = 30
 
 
-
 # RISK PARAMETERS — Portfolio Optimiser
 # These are passed into PyPortfolioOpt's EfficientFrontier
-
 
 RISK_PARAMS = {
     "risk_free_rate":    0.05,   # 5% annual risk-free rate (US T-bill proxy)
@@ -137,7 +135,6 @@ RISK_PARAMS = {
     "min_weight":        0.05,   # every stock must have at least 5% allocation
     "transaction_cost":  0.001,  # 0.1% per trade — used in backtesting
 }
-
 
 
 # NEWS / SENTIMENT
@@ -155,10 +152,8 @@ NEWS_FEEDS = [
 NEWS_LOOKBACK_DAYS = 30
 
 
-
 # STREAMLIT UI
 # Controls default appearance of the dashboard
-
 
 UI_CONFIG = {
     "page_title":  "Stock ML Dashboard",
