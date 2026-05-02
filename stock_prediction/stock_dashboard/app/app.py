@@ -7,8 +7,13 @@
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+import os
+_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_src  = os.path.join(_root, "src")
+
+for _p in [_root, _src]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
 
 import streamlit as st
 import pandas as pd

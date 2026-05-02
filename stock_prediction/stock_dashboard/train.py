@@ -107,8 +107,6 @@ def train():
     # Step 5 — Run Backtest on Test Split + Save Results
     # -------------------------------------------------------------------------
     print("\n[5/5] Running backtests on test split...")
-
-    from settings import DATE_CONFIG
     split = DATE_CONFIG["split"]
 
     for ticker, df in featured_data.items():

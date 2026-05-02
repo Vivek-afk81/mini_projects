@@ -1,9 +1,34 @@
-streamlit
+# =============================================================================
+# requirements.txt
+# Install all dependencies with: pip install -r requirements.txt
+# =============================================================================
+
+# --- Data ---
 yfinance
 pandas
 numpy
-scikit-learn
-xgboost
+feedparser
+
+# --- Machine Learning ---
 lightgbm
-plotly
+scikit-learn
 joblib
+
+# --- Forecasting ---
+prophet
+
+# --- Portfolio Optimisation ---
+pyportfolioopt
+
+# --- Sentiment ---
+vaderSentiment
+
+# --- Visualisation ---
+plotly
+
+# --- Dashboard ---
+streamlit
+
+# --- Testing ---
+pytest
+pytest-cov
