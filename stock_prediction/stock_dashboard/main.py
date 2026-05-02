@@ -2,13 +2,13 @@
 # main.py
 # Orchestrates the full inference pipeline at runtime.
 # Called by streamlit_app.py when the user clicks Run Analysis.
+# Loads a separate LightGBM model per ticker.
 # Does not train models. Does not display anything.
 # =============================================================================
 
 import sys
-from pathlib import Path
-
 import os
+
 _root = os.path.dirname(os.path.abspath(__file__))
 _src  = os.path.join(_root, "src")
 
@@ -16,6 +16,7 @@ for _p in [_root, _src]:
     if _p not in sys.path:
         sys.path.insert(0, _p)
 
+import joblib
 import pandas as pd
 
 from extractor  import MarketExtractor, NewsExtractor
@@ -27,11 +28,32 @@ from database   import Database
 from settings   import (
     TICKERS,
     DATE_CONFIG,
-    LGBM_MODEL_PATH,
+    MODELS_DIR,
     PREDICTION_THRESHOLD,
     ensure_dirs,
 )
 
+
+# =============================================================================
+# Helpers
+# =============================================================================
+
+def _load_lgbm(ticker: str) -> DirectionModel:
+    path = MODELS_DIR / f"lgbm_{ticker}.pkl"
+    m = DirectionModel()
+    m.model = joblib.load(path)
+    return m
+
+
+def _load_forecaster(ticker: str) -> PriceForecaster:
+    fc = PriceForecaster(ticker=ticker)
+    fc.load()
+    return fc
+
+
+# =============================================================================
+# Main Orchestration
+# =============================================================================
 
 def orchestrate(
     tickers:   list  = TICKERS,
@@ -70,75 +92,81 @@ def orchestrate(
         featured_data[ticker] = with_sentiment
 
     # -------------------------------------------------------------------------
-    # Step 3 — Load LightGBM + Predict on Test Split
+    # Step 3 — Load per-ticker LightGBM + Predict on Test Split
     # -------------------------------------------------------------------------
-    lgbm_model = DirectionModel()
-    lgbm_model.load(LGBM_MODEL_PATH)
+    predictions   = {}
+    backtests     = {}
+    metrics       = {}
+    lgbm_signals  = {}
+    fi_frames     = []
 
-    predictions    = {}
-    backtests      = {}
-    metrics        = {}
-    lgbm_signals   = {}
+    for ticker in tickers:
+        df = featured_data.get(ticker)
+        if df is None:
+            continue
 
-    for ticker, df in featured_data.items():
         test_df = df[df.index >= split].copy()
-
         if test_df.empty:
             continue
 
-        predicted = lgbm_model.predict(test_df, threshold=threshold)
-        bt        = lgbm_model.backtest(predicted)
-        m         = lgbm_model.compute_metrics(bt)
+        try:
+            model = _load_lgbm(ticker)
+        except FileNotFoundError:
+            continue
+
+        predicted = model.predict(test_df, threshold=threshold)
+        bt        = model.backtest(predicted)
+        m         = model.compute_metrics(bt)
 
         predictions[ticker]  = predicted
         backtests[ticker]    = bt
         metrics[ticker]      = m
-
-        # Latest signal: 1 = bullish, 0 = bearish
         lgbm_signals[ticker] = int(predicted["signal"].iloc[-1])
 
+        fi = model.feature_importance()
+        fi["ticker"] = ticker
+        fi_frames.append(fi)
+
+    # Aggregate feature importance across tickers
+    if fi_frames:
+        feature_importance = (
+            pd.concat(fi_frames)
+            .groupby("feature")["importance"]
+            .mean()
+            .reset_index()
+            .sort_values("importance", ascending=False)
+        )
+    else:
+        feature_importance = pd.DataFrame(columns=["feature", "importance"])
+
     # -------------------------------------------------------------------------
-    # Step 4 — Load Prophet + Get Trend Signals
+    # Step 4 — Load Prophet + Get Trend Signals + Forecasts
     # -------------------------------------------------------------------------
     trend_signals = {}
+    forecasts     = {}
 
     for ticker in tickers:
         try:
-            forecaster = PriceForecaster(ticker=ticker)
-            forecaster.load()
-            trend_signals[ticker] = forecaster.trend_signal()
+            fc = _load_forecaster(ticker)
+            trend_signals[ticker] = fc.trend_signal()
+            forecasts[ticker]     = fc.forecast()
         except FileNotFoundError:
-            # Prophet model not trained yet — skip gracefully
             trend_signals[ticker] = 0.0
-
-    # Prophet forecasts for display
-    forecasts = {}
-    for ticker in tickers:
-        try:
-            forecaster = PriceForecaster(ticker=ticker)
-            forecaster.load()
-            forecasts[ticker] = forecaster.forecast()
-        except FileNotFoundError:
-            forecasts[ticker] = pd.DataFrame()
+            forecasts[ticker]     = pd.DataFrame()
 
     # -------------------------------------------------------------------------
     # Step 5 — Portfolio Optimisation
     # -------------------------------------------------------------------------
-    optimiser  = PortfolioOptimiser()
+    optimiser = PortfolioOptimiser()
 
-    portfolio  = optimiser.filter_by_signals(
+    portfolio = optimiser.filter_by_signals(
         price_data=price_data,
         lgbm_signals=lgbm_signals,
         trend_signals=trend_signals,
     )
 
     # -------------------------------------------------------------------------
-    # Step 6 — Feature Importance
-    # -------------------------------------------------------------------------
-    feature_importance = lgbm_model.feature_importance()
-
-    # -------------------------------------------------------------------------
-    # Step 7 — Persist Results
+    # Step 6 — Persist Results
     # -------------------------------------------------------------------------
     db = Database()
 
@@ -154,7 +182,7 @@ def orchestrate(
     db.close()
 
     # -------------------------------------------------------------------------
-    # Return everything Streamlit needs in one dict
+    # Return everything Streamlit needs
     # -------------------------------------------------------------------------
     return {
         "tickers":            tickers,
