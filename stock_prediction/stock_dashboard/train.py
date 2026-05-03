@@ -1,10 +1,5 @@
-# =============================================================================
-# train.py
 # Runs the full training pipeline once and saves all pickles.
 # Trains a separate LightGBM model per ticker with strict temporal boundary.
-# Run this script locally before launching the Streamlit app.
-# Usage: python train.py
-# =============================================================================
 
 import sys
 import os
