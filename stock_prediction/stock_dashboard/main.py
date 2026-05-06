@@ -1,10 +1,9 @@
-# =============================================================================
 # main.py
 # Orchestrates the full inference pipeline at runtime.
 # Called by streamlit_app.py when the user clicks Run Analysis.
 # Loads a separate LightGBM model per ticker.
 # Does not train models. Does not display anything.
-# =============================================================================
+
 
 import sys
 import os
@@ -34,9 +33,9 @@ from settings   import (
 )
 
 
-# =============================================================================
+# 
 # Helpers
-# =============================================================================
+# 
 
 def _load_lgbm(ticker: str) -> DirectionModel:
     path = MODELS_DIR / f"lgbm_{ticker}.pkl"
@@ -51,9 +50,9 @@ def _load_forecaster(ticker: str) -> PriceForecaster:
     return fc
 
 
-# =============================================================================
+# 
 # Main Orchestration
-# =============================================================================
+# 
 
 def orchestrate(
     tickers:   list  = TICKERS,
@@ -65,9 +64,7 @@ def orchestrate(
 
     ensure_dirs()
 
-    # -------------------------------------------------------------------------
     # Step 1 — Fetch
-    # -------------------------------------------------------------------------
     market_extractor = MarketExtractor()
     news_extractor   = NewsExtractor()
 
@@ -79,9 +76,7 @@ def orchestrate(
 
     news_df = news_extractor.fetch_headlines()
 
-    # -------------------------------------------------------------------------
     # Step 2 — Process
-    # -------------------------------------------------------------------------
     feature_proc   = FeatureProcessor()
     sentiment_proc = SentimentProcessor()
 
@@ -91,9 +86,7 @@ def orchestrate(
         with_sentiment = sentiment_proc.process(with_features, news_df)
         featured_data[ticker] = with_sentiment
 
-    # -------------------------------------------------------------------------
     # Step 3 — Load per-ticker LightGBM + Predict on Test Split
-    # -------------------------------------------------------------------------
     predictions   = {}
     backtests     = {}
     metrics       = {}
@@ -139,9 +132,7 @@ def orchestrate(
     else:
         feature_importance = pd.DataFrame(columns=["feature", "importance"])
 
-    # -------------------------------------------------------------------------
     # Step 4 — Load Prophet + Get Trend Signals + Forecasts
-    # -------------------------------------------------------------------------
     trend_signals = {}
     forecasts     = {}
 
@@ -154,9 +145,7 @@ def orchestrate(
             trend_signals[ticker] = 0.0
             forecasts[ticker]     = pd.DataFrame()
 
-    # -------------------------------------------------------------------------
     # Step 5 — Portfolio Optimisation
-    # -------------------------------------------------------------------------
     optimiser = PortfolioOptimiser()
 
     portfolio = optimiser.filter_by_signals(
@@ -165,9 +154,7 @@ def orchestrate(
         trend_signals=trend_signals,
     )
 
-    # -------------------------------------------------------------------------
     # Step 6 — Persist Results
-    # -------------------------------------------------------------------------
     db = Database()
 
     for ticker in metrics:
@@ -181,9 +168,7 @@ def orchestrate(
 
     db.close()
 
-    # -------------------------------------------------------------------------
     # Return everything Streamlit needs
-    # -------------------------------------------------------------------------
     return {
         "tickers":            tickers,
         "price_data":         price_data,

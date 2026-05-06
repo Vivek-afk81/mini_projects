@@ -1,8 +1,4 @@
-# =============================================================================
-# streamlit_app.py
-# UI layer only. Calls main.orchestrate() and displays results.
-# No model logic. No data fetching. No calculations.
-# =============================================================================
+# UI layer only. 
 
 import sys
 from pathlib import Path
@@ -26,9 +22,7 @@ import main
 from database import Database
 from settings import TICKERS, DATE_CONFIG, PREDICTION_THRESHOLD, UI_CONFIG
 
-# =============================================================================
 # PAGE CONFIG
-# =============================================================================
 
 st.set_page_config(
     page_title=UI_CONFIG["page_title"],
@@ -36,9 +30,7 @@ st.set_page_config(
     layout=UI_CONFIG["layout"],
 )
 
-# =============================================================================
 # CUSTOM CSS
-# =============================================================================
 
 st.markdown("""
 <style>
@@ -116,9 +108,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# =============================================================================
 # PLOT THEME
-# =============================================================================
 
 PLOT_LAYOUT = dict(
     paper_bgcolor="rgba(0,0,0,0)",
@@ -145,9 +135,7 @@ COLORS = {
     "highlight": "#f0c040",
 }
 
-# =============================================================================
 # SIDEBAR
-# =============================================================================
 
 with st.sidebar:
     st.markdown("## ⚙ Configuration")
@@ -196,11 +184,9 @@ with st.sidebar:
         unsafe_allow_html=True,
     )
 
-# =============================================================================
 # HEADER
-# =============================================================================
 
-st.markdown("# 📈 Stock ML Dashboard")
+st.markdown("# MarketVision ML")
 st.markdown(
     "<p style='color:#555; margin-top:-0.75rem;'>"
     "LightGBM direction signals · Prophet trend forecasting · "
@@ -217,9 +203,7 @@ if not selected_tickers:
     st.warning("Please select at least one ticker.")
     st.stop()
 
-# =============================================================================
 # RUN PIPELINE
-# =============================================================================
 
 with st.spinner("Running pipeline — fetching, processing, predicting, optimising..."):
     try:
@@ -240,9 +224,7 @@ with st.spinner("Running pipeline — fetching, processing, predicting, optimisi
         st.error(f"Pipeline error: {e}")
         st.stop()
 
-# =============================================================================
 # SECTION 1 — SIGNALS OVERVIEW
-# =============================================================================
 
 st.markdown('<p class="section-header">Current Signals</p>', unsafe_allow_html=True)
 
@@ -276,9 +258,7 @@ for i, ticker in enumerate(selected_tickers):
 
 st.divider()
 
-# =============================================================================
 # SECTION 2 — TICKER DEEP DIVE (tabs)
-# =============================================================================
 
 st.markdown('<p class="section-header">Ticker Analysis</p>', unsafe_allow_html=True)
 
@@ -398,9 +378,7 @@ if valid_tickers:
 
 st.divider()
 
-# =============================================================================
 # SECTION 3 — PORTFOLIO OPTIMISATION
-# =============================================================================
 
 st.markdown('<p class="section-header">Portfolio Optimisation</p>', unsafe_allow_html=True)
 
@@ -481,9 +459,7 @@ with col_right:
 
 st.divider()
 
-# =============================================================================
 # SECTION 4 — FEATURE IMPORTANCE
-# =============================================================================
 
 st.markdown('<p class="section-header">Feature Importance</p>', unsafe_allow_html=True)
 
@@ -508,9 +484,7 @@ st.plotly_chart(fig_fi, use_container_width=True)
 
 st.divider()
 
-# =============================================================================
 # SECTION 5 — HISTORICAL BACKTEST LOG (from database)
-# =============================================================================
 
 st.markdown('<p class="section-header">Backtest History</p>', unsafe_allow_html=True)
 
@@ -547,9 +521,7 @@ try:
 except Exception:
     st.caption("Database not available on this deployment.")
 
-# =============================================================================
 # FOOTER
-# =============================================================================
 
 st.divider()
 st.markdown(
